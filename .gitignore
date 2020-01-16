@@ -130,6 +130,6 @@ dmypy.json
 
 .idea
 
-# Project folders
-dataset_preparation/data/
-dataset_preparation/model/
+# Project folder
+/dataset_preparation/data/
+/dataset_preparation/model/
