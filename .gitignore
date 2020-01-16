@@ -131,5 +131,5 @@ dmypy.json
 .idea
 
 # Project folders
-dataset_preparation/data
-dataset_preparation/model
+dataset_preparation/data/
+dataset_preparation/model/
