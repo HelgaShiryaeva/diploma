@@ -133,3 +133,6 @@ dmypy.json
 # Project folder
 /dataset_preparation/data/
 /dataset_preparation/model/
+/tracking/protos/
+/tracking/hand_inference_graph/
+/tracking/model-checkpoint/
