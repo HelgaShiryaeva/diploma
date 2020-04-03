@@ -10,13 +10,8 @@ https://github.com/victordibia/handtracking
 import scipy.io as sio
 import numpy as np
 import os
-import gc
 import cv2
-import time
-import xml.etree.cElementTree as ET
-import random
 import shutil as sh
-from shutil import copyfile
 import zipfile
 import six.moves.urllib as urllib
 import csv

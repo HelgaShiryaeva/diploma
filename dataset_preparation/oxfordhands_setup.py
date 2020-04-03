@@ -10,9 +10,11 @@ import tarfile
 import six.moves.urllib as urllib
 import shutil as sh
 
+
 def create_directory(dir_path):
     if not os.path.exists(dir_path):
         os.makedirs(dir_path)
+
 
 def download_dataset(dataset_name, dataset_url, tarfile_path):
     if not os.path.exists(tarfile_path):
@@ -25,7 +27,8 @@ def download_dataset(dataset_name, dataset_url, tarfile_path):
     else:
         print("> Oxford Hand dataset already downloaded.\sttart cleaning structure")
         extract_files(dataset_name, tarfile_path)
-            
+
+
 def extract_files(dataset_name, tarfile_path):
         if not os.path.exists(dataset_name):
             tar = tarfile.open(tarfile_path)
@@ -33,6 +36,7 @@ def extract_files(dataset_name, tarfile_path):
             tar.extractall()
             print("> Extraction complete")
             tar.close()
+
 
 def rename_double(path,name):
     if os.path.isfile(path+name):
@@ -42,6 +46,7 @@ def rename_double(path,name):
         rename_double(path,newname)
     else:
         return name
+
 
 def check_equal(src_dir, drc_dir):
     src = len([name for name in os.listdir(src_dir) if os.path.isfile(name)])
@@ -53,6 +58,7 @@ def check_equal(src_dir, drc_dir):
         print("> unequal directory sizes, manual check necessary!")
         return False
 
+
 def create_label_map():
     label_map = "data/label_map.pbtxt"
     if not os.path.isfile(label_map):
@@ -60,6 +66,7 @@ def create_label_map():
         f.write("item {\n  id: 1\n  name: 'hand'\n}")
         f.close()
     print("> created {}".format(label_map))
+
 
 def cleanup_structure(data_path, dataset_path, tarfile_path):
     check = []
@@ -91,11 +98,9 @@ def cleanup_structure(data_path, dataset_path, tarfile_path):
             check.append(check_equal(src_dir, drc_dir))
     if not False in check:
         sh.rmtree(dataset_path)
-        #os.remove(tarfile_path)
         print('> Dataset successuflly set up!')
     else:
         print("> check manually for possible errors in created /data directory!")
-
 
 
 def main():
