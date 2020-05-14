@@ -4,7 +4,7 @@ from collections import OrderedDict
 
 
 class Tracker:
-    def __init__(self, active_threshold=10, non_active_threshold=10, iou_threshold=0.4):
+    def __init__(self, active_threshold=10, non_active_threshold=10, iou_threshold=0.3):
         self.next_object_id = 0
         self.objects = OrderedDict()
         self.potential_active = OrderedDict()

@@ -27,14 +27,14 @@ if __name__ == '__main__':
         '--width',
         dest='width',
         type=int,
-        default=640,
+        default=1080,
         help='Width of the frames in the video stream.')
     parser.add_argument(
         '-ht',
         '--height',
         dest='height',
         type=int,
-        default=480,
+        default=720,
         help='Height of the frames in the video stream.')
     args = parser.parse_args()
 

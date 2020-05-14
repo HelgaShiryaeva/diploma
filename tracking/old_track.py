@@ -90,15 +90,8 @@ if __name__ == '__main__':
         '--scorethreshold',
         dest='score_thresh',
         type=float,
-        default=0.2,
+        default=0.5,
         help='Score threshold for displaying bounding boxes')
-    parser.add_argument(
-        '-fps',
-        '--fps',
-        dest='fps',
-        type=int,
-        default=1,
-        help='Show FPS on detection/display visualization')
     parser.add_argument(
         '-src',
         '--source',
@@ -110,36 +103,15 @@ if __name__ == '__main__':
         '--width',
         dest='width',
         type=int,
-        default=640,
+        default=1080,
         help='Width of the frames in the video stream.')
     parser.add_argument(
         '-ht',
         '--height',
         dest='height',
         type=int,
-        default=480,
+        default=720,
         help='Height of the frames in the video stream.')
-    parser.add_argument(
-        '-ds',
-        '--display',
-        dest='display',
-        type=int,
-        default=1,
-        help='Display the detected images using OpenCV. This reduces FPS')
-    parser.add_argument(
-        '-num-w',
-        '--num-workers',
-        dest='num_workers',
-        type=int,
-        default=4,
-        help='Number of workers.')
-    parser.add_argument(
-        '-q-size',
-        '--queue-size',
-        dest='queue_size',
-        type=int,
-        default=5,
-        help='Size of the queue.')
     args = parser.parse_args()
 
     cap = cv2.VideoCapture(args.video_source)
@@ -150,25 +122,28 @@ if __name__ == '__main__':
     num_frames = 0
     width, height = (cap.get(3), cap.get(4))
 
-    non_active_threshold = 8
-    active_threshold = 10
+    non_active_threshold = 15
+    active_threshold = 8
     tracker = IouTracker(active_threshold=active_threshold, non_active_threshold=non_active_threshold)
 
     writer = None
 
     while True:
+        start_time = datetime.datetime.now()
         ret, image = cap.read()
 
         image = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
 
-        boxes, confidences, classIDs = detector_utils.detect_objects(image, detection_graph, sess)
+        boxes, confidences, class_ids = detector_utils.detect_objects(image, detection_graph, sess)
 
-        detections_bbox = detector_utils.draw_box_on_image(args.score_thresh, confidences, boxes, width, height, image)
+        boxes, confidences = detector_utils.filter_boxes(args.score_thresh, confidences, boxes, width, height)
 
-        objects = tracker.update(detections_bbox)
+        detector_utils.draw_box_on_image(confidences, boxes, image)
 
-        for (objectID, centroid) in objects.items():
-            text = "id{}".format(objectID)
+        objects = tracker.update(boxes)
+
+        for (object_id, centroid) in objects.items():
+            text = "id{}".format(object_id)
             cv2.putText(image, text, (centroid[0] - 5, centroid[1] - 5), cv2.FONT_HERSHEY_SIMPLEX, 0.7, (255, 0, 0), 2)
             cv2.circle(image, (centroid[0], centroid[1]), 4, (0, 255, 0), -1)
 
@@ -180,19 +155,15 @@ if __name__ == '__main__':
             writer = cv2.VideoWriter("output.avi", fourcc, 30, (int(width), int(height)), True)
         writer.write(cv2.cvtColor(image, cv2.COLOR_RGB2BGR))
 
-        num_frames += 1
         elapsed_time = (datetime.datetime.now() - start_time).total_seconds()
-        fps = num_frames / elapsed_time
+        fps = 1 / elapsed_time
 
-        if args.display > 0:
-            if args.fps > 0:
-                detector_utils.draw_fps_on_image("FPS : " + str(int(fps)), image)
+        detector_utils.draw_fps_on_image("FPS : " + str(int(fps)), image)
 
-            cv2.imshow('Hand tracking', cv2.cvtColor(image, cv2.COLOR_RGB2BGR))
+        cv2.imshow('Hand tracking', cv2.cvtColor(image, cv2.COLOR_RGB2BGR))
 
-            if cv2.waitKey(25) & 0xFF == ord('q'):
-                cv2.destroyAllWindows()
-                break
-        else:
-            print("frames processed: ", num_frames, "elapsed time: ", elapsed_time, "fps: ", str(int(fps)))
+        if cv2.waitKey(25) & 0xFF == ord('q'):
+            cv2.destroyAllWindows()
+            break
+
     writer.release()
