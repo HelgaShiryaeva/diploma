@@ -7,9 +7,8 @@ class Tracker:
     def __init__(self, active_threshold=10, non_active_threshold=10, iou_threshold=0.3):
         self.next_object_id = 0
         self.objects = OrderedDict()
-        self.potential_active = OrderedDict()
-        self.lost = OrderedDict()
         self.active = OrderedDict()
+        self.lost = OrderedDict()
         self.finished = OrderedDict()
         self.non_active_threshold = non_active_threshold
         self.active_threshold = active_threshold
@@ -18,20 +17,20 @@ class Tracker:
     def add_object(self, new_object_location):
         self.objects[self.next_object_id] = new_object_location
         self.lost[self.next_object_id] = 0
-        self.potential_active[self.next_object_id] = 1
+        self.active[self.next_object_id] = 1
         self.next_object_id += 1
 
     def remove_object(self, object_id):
         del self.objects[object_id]
         del self.lost[object_id]
-        del self.potential_active[object_id]
+        del self.active[object_id]
 
     def update(self, detections):
         if len(detections) == 0:
             lost_ids = list(self.lost.keys())
             for object_id in lost_ids:
                 self.lost[object_id] += 1
-                self.potential_active[object_id] = 0
+                self.active[object_id] = 0
                 if self.lost[object_id] > self.non_active_threshold:
                     self.remove_object(object_id)
 
@@ -51,11 +50,11 @@ class Tracker:
                 object_id = object_ids[col]
                 self.objects[object_id] = detections[row]
                 self.lost[object_id] = 0
-                self.potential_active[object_id] += 1
+                self.active[object_id] += 1
 
             for row in unmatched_trackers:
                 object_id = object_ids[row]
-                self.potential_active[object_id] -= 1
+                self.active[object_id] -= 1
                 self.lost[object_id] += 1
 
                 if self.lost[object_id] > self.non_active_threshold:
@@ -66,7 +65,7 @@ class Tracker:
 
         active_objects = dict(
             filter(
-            lambda elem: self.potential_active[elem[0]] > self.active_threshold, self.objects.items()
+            lambda elem: self.active[elem[0]] > self.active_threshold, self.objects.items()
             )
         )
 
